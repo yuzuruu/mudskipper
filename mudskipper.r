@@ -350,15 +350,22 @@ fit_water_summary <-
   )
 # 
 # ----- line.results ------
-
-fit_land_summary <- readr::read_csv("fit_land_summary.csv")
-fit_shore_summary <- readr::read_csv("fit_shore_summary.csv")
-fit_water_summary <- readr::read_csv("fit_water_summary.csv")
-
-
-
+# The computation period is LONG.
+# Using the saved results, we can save the computation period.
+# 
+# read analyses results
 # land
-# overlap observed number and estimated values 
+fit_land_summary <- 
+  readr::read_csv("fit_land_summary.csv")
+# shore
+fit_shore_summary <- 
+  readr::read_csv("fit_shore_summary.csv")
+# water
+fit_water_summary <- 
+  readr::read_csv("fit_water_summary.csv")
+# 
+# Obtain estimated proportion by spot
+# 1. land
 # yhat
 # yhat denotes estimated value of Y
 data_yhat_land <- 
@@ -370,12 +377,12 @@ data_yhat_land <-
       "yhat"
       ) 
   ) %>% 
-  # 
   dplyr::mutate(
-    # parameter's name
-    parameter = str_extract(variable, "(.+)(?=\\[)"),
+    # obtain parameter's name while removing unnecessary strings
+    # In detail of regular expression, please refer to cheatsheet of stringr() package.
+    parameter = stringr::str_extract(variable, "(.+)(?=\\[)"),
     # days after hatch
-    Days_after_hatch = as.numeric(str_extract(variable, "(?<=[:punct:])(.+)(?=\\,)")),
+    Days_after_hatch = as.numeric(stringr::str_extract(variable, "(?<=[:punct:])(.+)(?=\\,)")),
     # ID by individual (toll tank)
     individual = as.numeric(str_extract(variable, "(?<=,)(.+)(?=\\])"))
     ) %>% 
@@ -398,7 +405,7 @@ data_yhat_land <-
     # for convenience to indicate x axis
     Days_after_hatch = Days_after_hatch+27
     )
-
+# 
 # Y
 data_Y_land <- 
   mudskipper_data %>% 
@@ -411,8 +418,8 @@ data_yhat_y_land <-
     data_Y_land,
     by = c("individual", "Days_after_hatch")
   )
-
-# 作図
+# 
+# plot
 line_data_yhat_y_land <- 
   data_yhat_y_land %>% 
   ggplot2::ggplot(
@@ -422,14 +429,6 @@ line_data_yhat_y_land <-
       color = individual
     )
   ) +
-  # geom_ribbon(
-  #   aes(
-  #     ymin = q5,
-  #     ymax = q95,
-  #   ),
-  #   fill = "grey",
-  #   colour = "transparent"
-  # ) +
   geom_line() +
   geom_point(
     aes(
@@ -454,7 +453,7 @@ line_data_yhat_y_land <-
     legend.position = "none",
     strip.background = element_blank()
   )
-
+# save
 ggsave(
   "line_data_yhat_y_land.pdf",
   plot = line_data_yhat_y_land,
@@ -462,9 +461,7 @@ ggsave(
   width = 200,
   units = "mm"
 )
-
-
-
+# 
 # water
 # overlap observed number and estimated values 
 # yhat
@@ -506,7 +503,7 @@ data_yhat_water <-
     # for convenience to indicate x axis
     Days_after_hatch = Days_after_hatch+27
   )
-
+# 
 # Y
 data_Y_water <- 
   mudskipper_data %>% 
@@ -530,14 +527,6 @@ line_data_yhat_y_water <-
       color = individual
     )
   ) +
-  # geom_ribbon(
-  #   aes(
-  #     ymin = q5,
-  #     ymax = q95,
-  #   ),
-  #   fill = "grey",
-  #   colour = "transparent"
-  # ) +
   geom_line() +
   geom_point(
     aes(
@@ -562,7 +551,7 @@ line_data_yhat_y_water <-
     legend.position = "none",
     strip.background = element_blank()
   )
-
+# 
 ggsave(
   "line_data_yhat_y_water.pdf",
   plot = line_data_yhat_y_water,
@@ -570,10 +559,6 @@ ggsave(
   width = 200,
   units = "mm"
 )
-
-
-
-
 # shore
 # overlap observed number and estimated values 
 # yhat
@@ -615,21 +600,20 @@ data_yhat_shore <-
     # for convenience to indicate x axis
     Days_after_hatch = Days_after_hatch+27
   )
-
+# 
 # Y
 data_Y_shore <- 
   mudskipper_data %>% 
   dplyr::filter(position == "shore") %>%
   dplyr::select(-group, -position) 
-
+# 
 data_yhat_y_shore <- 
   data_yhat_shore %>% 
   dplyr::left_join(
     data_Y_shore,
     by = c("individual", "Days_after_hatch")
   )
-
-# 作図
+# 
 line_data_yhat_y_shore <- 
   data_yhat_y_shore %>% 
   ggplot2::ggplot(
@@ -639,14 +623,6 @@ line_data_yhat_y_shore <-
       color = individual
     )
   ) +
-  # geom_ribbon(
-  #   aes(
-  #     ymin = q5,
-  #     ymax = q95,
-  #   ),
-  #   fill = "grey",
-  #   colour = "transparent"
-  # ) +
   geom_line() +
   geom_point(
     aes(
@@ -671,7 +647,7 @@ line_data_yhat_y_shore <-
     legend.position = "none",
     strip.background = element_blank()
   )
-
+# 
 ggsave(
   "line_data_yhat_y_shore.pdf",
   plot = line_data_yhat_y_shore,
@@ -679,7 +655,4 @@ ggsave(
   width = 200,
   units = "mm"
 )
-
-
-
 # END
